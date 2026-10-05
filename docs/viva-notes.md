@@ -141,5 +141,6 @@ This was tested: incidents #2 and #4 were picked up after a restart.
   injected but have no dedicated AIRA rule.
 * The demo's logs go to OpenSearch (not Loki as the synopsis says). Some log records are rejected
   because of an upstream field-mapping conflict. Logs are not yet used by AIRA.
-* CrewAI creates an empty app-data folder under `%LOCALAPPDATA%\CrewAI` on C:. That path is
-  hard-coded in the library; all real data is on D:.
+* CrewAI writes one small task-output cache file (~20 KB) under `%LOCALAPPDATA%\CrewAI\backend` on C:.
+  That path comes from `appdirs` inside the library and cannot be redirected. WSL2 keeps its swap
+  file in `%TEMP%` on C: (~1.2 GB) by default. All project data, images, models and caches are on D:.

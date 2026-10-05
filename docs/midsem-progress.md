@@ -59,7 +59,18 @@ on services with low traffic (payment about 0.05 req/s, cart's `EmptyCart` about
 | Ollama | ~1 GB system RAM + 5.6 GB GPU memory |
 | AIRA backend | ~210 MB |
 | System RAM in use | 18.6 of 23.7 GB with VS Code and a browser open |
-| Disk on D: | see final report (`D:\AIRA` total) |
+| Disk on D: | 28.4 GB in `D:\AIRA`: Docker disk image 22.7 GB, model 4.4 GB, caches 0.7 GB, venv 0.6 GB |
+| Disk on C: | AIRA itself: one ~20 KB CrewAI cache file. WSL2 swap file (~1.2 GB, Windows default location) |
+
+### End-to-end rehearsal (2026-10-06, after a cold `stop-all` → WSL restart → `start-all`)
+
+| Step | Result |
+|---|---|
+| `start-all.ps1` from cold (Docker Desktop not running) | healthy in 55 s after the engine came up; all checks `[OK]` |
+| `start-all.ps1` re-run on a running stack | idempotent, 40 s, only restarted the missing backend |
+| `payment-failure` | 4 incidents (payment + checkout) at ~2 min 15 s; each triaged in 7.2–7.5 s; error ratio 100 % vs 0.0 % baseline |
+| `service-down` | AiraServiceDown at ~75 s; triaged in 7.3 s as `service_unavailable`, confidence high |
+| Clear both | all alerts and incidents resolved without intervention within ~4 min |
 
 ## In progress / known limitations
 
