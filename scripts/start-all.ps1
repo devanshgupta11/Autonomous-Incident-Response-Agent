@@ -27,10 +27,12 @@ $null = Wait-Until { Test-Http 'http://localhost:8080/feature/api/read' } 120 'f
 # containers run makes it discover every container.
 Write-Step "Collector restart (container metrics discovery)"
 docker restart otel-collector | Out-Null
+# Wait past the 15s window so only samples sent by the restarted collector count.
+Start-Sleep -Seconds 20
 $need = @('cart', 'payment', 'ad', 'recommendation', 'product-catalog', 'frontend')
 $ok = Wait-Until {
     try {
-        $names = (Invoke-RestMethod 'http://localhost:9090/api/v1/query?query=count%20by%20(container_name)%20(count_over_time(container_memory_usage_total_bytes%5B30s%5D))' -TimeoutSec 5).data.result.metric.container_name
+        $names = (Invoke-RestMethod 'http://localhost:9090/api/v1/query?query=count%20by%20(container_name)%20(count_over_time(container_memory_usage_total_bytes%5B15s%5D))' -TimeoutSec 5).data.result.metric.container_name
         -not ($need | Where-Object { $names -notcontains $_ })
     } catch { $false }
 } 120 "container metrics for $($need -join ', ')" 5

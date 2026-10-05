@@ -36,8 +36,10 @@ function Write-Fail($msg) { Write-Host "  [FAIL] $msg" -ForegroundColor Red }
 function Write-Info($msg) { Write-Host "         $msg" }
 
 # Runs docker compose with exactly the upstream "make start" files plus the AIRA layer.
+# Deliberately a simple function using $args: an advanced function (param + [Parameter]) would
+# swallow "-d" as its own -Debug common parameter and run compose attached.
 function Invoke-Compose {
-    param([Parameter(ValueFromRemainingArguments = $true)][string[]]$ComposeArgs)
+    $ComposeArgs = $args
     Push-Location $DemoDir
     try {
         $base = @('compose', '--env-file', '.env', '--env-file', '.env.override', '--env-file', '..\infra\aira.env',
