@@ -81,6 +81,10 @@ def _agent() -> Agent:
 def _incident_block(inc: dict) -> str:
     labels = {k: v for k, v in (inc.get("labels") or {}).items()}
     return (
+        "ENVIRONMENT\n"
+        "- The OpenTelemetry Demo (Astronomy Shop) microservices, each running as a Docker container\n"
+        "  (Docker Compose, single host). There is no Kubernetes. Container name = service name.\n"
+        "- Available data sources: Prometheus metrics (below), Jaeger traces, container logs, feature flags.\n\n"
         "ALERT\n"
         f"- alertname: {inc['alertname']}\n"
         f"- service: {inc.get('service')}\n"
