@@ -46,7 +46,7 @@ The images are pulled pre-built and never built from source.
 Other services publish container ports to **random** host ports (e.g. `telemetry-docs` 8000 maps to a
 random host port), so nothing conflicts with the AIRA backend on host port 8000.
 
-## Services (27 containers)
+## Services (28 demo containers; AIRA adds `alertmanager` = 29)
 
 | Container | Image | Published ports (host side is random unless shown) |
 |---|---|---|
@@ -129,7 +129,8 @@ Other per-service RED metrics also exist but are not uniform across languages:
 
 | Metric | Meaning | Label |
 |---|---|---|
-| `container_cpu_utilization_ratio` | CPU used, **in percent** (e.g. `2.35` = 2.35 %; can exceed 100 on multi-core) | `container_name` |
+| `container_cpu_usage_nanoseconds_total` | cumulative CPU time (ns). **AIRA uses** `rate(...[1m]) / 1e9 * 100` = percent of one core | `container_name` |
+| `container_cpu_utilization_ratio` | gauge, **not used**: with `adHighCpu` on, the counter showed ad at 3.99 cores (`docker stats` showed 404 %), while this gauge crept up about 2.5 points per 10 s sample (2 → 15), so it lags far behind reality | `container_name` |
 | `container_memory_usage_total_bytes` | memory used, bytes | `container_name` |
 | `container_memory_usage_limit_bytes` | memory limit, bytes | `container_name` |
 | `container_memory_percent_ratio` | memory used / limit, percent | `container_name` |
@@ -196,6 +197,7 @@ clone shows it as modified even when every flag is off. The content is semantica
 | Issue | Evidence | Handling |
 |---|---|---|
 | `product-catalog` degraded at baseline | 130–190 % CPU at 15.4/20 MiB with `GOMEMLIMIT=16MiB`; Jaeger GetProduct median 800 ms | `infra/compose.aira.yaml` raises it to `GOMEMLIMIT=48MiB` / 64M. Result: 0.3 % CPU, median 3.8 ms, p95 21 ms |
+| `container_cpu_utilization_ratio` lags far behind real CPU | see the CPU table above | Use the rate of `container_cpu_usage_nanoseconds_total` instead |
 | Collector misses containers that start at the same moment it does | `cart`, `payment`, `flagd-ui` had no `container_*` series. After `docker restart otel-collector` they appeared within 10 s | `scripts/start-all.ps1` restarts the collector once all containers are up |
 | Span metrics only every 60 s | 1 sample per series per minute | `metrics_flush_interval: 15s` via the extras config seam |
 | OpenSearch rejects some log records | collector logs `mapper_parsing_exception … [attributes.http] … found [text]` | Upstream mapping conflict. Other logs are still indexed. Not used by the mid-semester pipeline |

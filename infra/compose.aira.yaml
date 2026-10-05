@@ -32,6 +32,8 @@ services:
     volumes:
       - ../infra/prometheus/prometheus-config.yaml:/etc/aira/prometheus-config.yaml:ro
       - ../infra/alert-rules.yml:/etc/aira/alert-rules.yml:ro
+      # Keep metric history across container re-creation (upstream stores it in the container layer).
+      - aira-prometheus-data:/prometheus
     depends_on:
       - alertmanager
 
@@ -57,3 +59,6 @@ services:
       options:
         max-size: "5m"
         max-file: "2"
+
+volumes:
+  aira-prometheus-data:
